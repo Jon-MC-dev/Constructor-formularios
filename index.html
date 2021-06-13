@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+
+  <title>Constructor de formularios</title>
+</head>
+
+<body>
+  <div class="container mt-5">
+    <div class="row text-center">
+      <div class="col-12" id="content_form">
+
+      </div>
+    </div>
+    <div class="row text-center">
+      <div class="col-1">
+
+      </div>
+      <div class="col-3">
+        <select class="form-control form-control-sm" id="input_select_tipo_entrada">
+          <option value="0">Input normal</option>
+          <option value="1">Opcion multiple radios</option>
+          <option value="2">Opcion multiple cheks</option>
+          <option value="3">Select</option>
+        </select>
+      </div>
+      <div class="col-4">
+        <input type="text" class="form-control form-control-sm" id="input_pregunta" placeholder="Escriba la pregunta">
+      </div>
+      <div class="col-3">
+        <button type="button" class="btn btn-sm btn-success" id="btn_add_campo">Agregar Campo</button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+  <script>
+    const ARRAY_CAMPOS = [];
+    const INPUT_NORMAL = "0";
+    const OPCION_MULTIPLE_RADIOS = "1";
+    const OPCION_MULTIPLE_CHECKS = "2";
+    const SELECT = "3";
+
+    $("#btn_add_campo").on("click", () => {
+      // Declaracion de variables
+      let tipo_input = $("#input_select_tipo_entrada").val();
+
+      let json_settings = {
+        'tipo': tipo_input,
+        'pregunta': $("#input_pregunta").val(),
+        'select_opciones': [],
+        'radio_opciones': [],
+        'chek_opciones': [],
+
+      };
+      ARRAY_CAMPOS.push(json_settings);
+      renderearCampos();
+    });
+
+
+    function renderearCampos() {
+      $("#content_form").html("");
+      ARRAY_CAMPOS.forEach((item, i) => {
+        let html_tipo_input = "";
+        if (item.tipo == INPUT_NORMAL) {
+          html_tipo_input = `
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="${i+"pregunta"}">
+            <label for="${i+"pregunta"}">${item.pregunta}</label>
+          </div>`;
+        } else if (item.tipo == OPCION_MULTIPLE_RADIOS) {
+          stringRadios = item.pregunta;
+          item.radio_opciones.forEach((itemOpcion, j) => {
+            stringRadios += `
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="${i + 'radio_opcion'}" id="${i +  'radio_opcion' + j }">
+                <label class="form-check-label" for="${i +  'radio_opcion' + j }">
+                  ${itemOpcion.valorRadio}
+                </label>
+              </div>
+              `;
+          });
+          html_tipo_input = stringRadios;
+        } else if (item.tipo == OPCION_MULTIPLE_CHECKS) {
+          stringChecks = item.pregunta;
+          item.chek_opciones.forEach((itemOpcion, j) => {
+            stringChecks += `
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="${i + 'check_opcion'}" id="${i +  'check_opcion' + j }">
+                <label class="form-check-label" for="${i +  'check_opcion' + j }">
+                  ${itemOpcion.valorCheck}
+                </label>
+              </div>
+              `;
+          });
+          html_tipo_input = stringChecks;
+        } else if (item.tipo == SELECT) {
+          html_tipo_input = `
+          <div class="form-floating">
+            <select class="form-select form-select-sm" id="${i+"pregunta"} aria-label="${item.pregunta}">
+            ${renderearOpcionesSelect(item.select_opciones)}
+            </select>
+            <label for="${i+"pregunta"}">${item.pregunta}</label>
+          </div>
+          `;
+        }
+        //
+        $("#content_form").append(`
+        <div class="row">
+          <div class="col-7">
+            ${html_tipo_input}
+          </div>
+          <div class="col-5">
+          ${item.tipo == SELECT?
+          `
+          <div class="row">
+            <div class="col">
+              <input type="text" class="form-control form-control-sm" id="${i+"_input_opcion_select"}">
+            </div>
+            <div class="col">
+              <button type="button" class="btn btn-sm btn-dark" onclick="agregarAlSelectOpciones(${i})">Agregar</button>
+            </div>
+          </div>
+          `
+          :
+          ``}
+          ${item.tipo == OPCION_MULTIPLE_RADIOS?
+          `
+          <div class="row">
+            <div class="col-10">
+              <input type="text" class="form-control form-control-sm" id="${i+"_input_opcion_multiple_radios"}">
+            </div>
+            <div class="col-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="${i+"_input_opcion_radio_correcto"}" >
+                <label class="form-check-label" for="${i+"_input_opcion_radio_correcto"}">
+                  Correcta
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="row mt-1">
+            <div class="col">
+              <button type="button" class="btn btn-sm btn-dark" onclick="agregarMultiplesRadios(${i})">Agregar</button>
+            </div>
+          </div>
+
+          `
+          :
+          ``}
+          ${item.tipo == OPCION_MULTIPLE_CHECKS?
+          `
+          <div class="row">
+            <div class="col-10">
+              <input type="text" class="form-control form-control-sm" id="${i+"_input_opcion_multiple_checks"}">
+            </div>
+            <div class="col-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="${i+"_input_opcion_check_correcto"}" >
+                <label class="form-check-label" for="${i+"_input_opcion_check_correcto"}">
+                  Correcta
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="row mt-1">
+            <div class="col">
+              <button type="button" class="btn btn-sm btn-dark" onclick="agregarMultiplesChecks(${i})">Agregar</button>
+            </div>
+          </div>
+
+          `
+          :
+          ``}
+          <div class="row m-3">
+          <div class="col">
+            <button type="button" class="btn btn-danger" onclick="quitarPregunta(${i})" >Quitar</button>
+            <button type="button" class="btn btn-primary" ${ARRAY_CAMPOS.length == 1 || i == 0? "disabled": ""} onclick="subirPregunta(${i})">Subir</button>
+            <button type="button" class="btn btn-success" ${ARRAY_CAMPOS.length==1 || i == ARRAY_CAMPOS.length - 1 ? "disabled": ""} onclick="bajarPregunta(${i})">Bajar</button>
+            </div>
+            </div>
+          </div>
+        </div>
+        `);
+      });
+    }
+
+    function agregarMultiplesChecks(index) {
+      let valorInput = $(`#${index}_input_opcion_multiple_checks`).val();
+      let valorInputCorrecto = $(`#${index}_input_opcion_check_correcto`).prop('checked');
+      ARRAY_CAMPOS[index].chek_opciones.push({
+        'valorCheck': valorInput,
+        'correcta': valorInputCorrecto
+      });
+
+      renderearCampos();
+    }
+
+    function agregarMultiplesRadios(index) {
+      let valorInput = $(`#${index}_input_opcion_multiple_radios`).val();
+      let valorInputCorrecto = $(`#${index}_input_opcion_radio_correcto`).prop('checked');
+      ARRAY_CAMPOS[index].radio_opciones.push({
+        'valorRadio': valorInput,
+        'correcta': valorInputCorrecto
+      });
+
+      renderearCampos();
+
+    }
+
+    function renderearOpcionesSelect(opciones) {
+      let stringOpciones = "";
+      opciones.forEach((item, i) => {
+        stringOpciones += `
+        <option value="${item}">${item}</option>
+        `;
+      });
+      return stringOpciones;
+    }
+
+    function agregarAlSelectOpciones(index) {
+      let valorInput = $(`#${index}_input_opcion_select`).val();
+      ARRAY_CAMPOS[index].select_opciones.push(valorInput);
+      renderearCampos();
+    }
+
+    function subirPregunta(index) {
+      console.log("Vamos a hacer un intercambio");
+      let auxIntercambio = ARRAY_CAMPOS[index - 1];
+      ARRAY_CAMPOS[index - 1] = ARRAY_CAMPOS[index];
+      ARRAY_CAMPOS[index] = auxIntercambio;
+      renderearCampos();
+    }
+
+    function bajarPregunta(index) {
+      console.log("Vamos a hacer un intercambio");
+      let auxIntercambio = ARRAY_CAMPOS[index + 1];
+      ARRAY_CAMPOS[index + 1] = ARRAY_CAMPOS[index];
+      ARRAY_CAMPOS[index] = auxIntercambio;
+      renderearCampos();
+    }
+
+    function quitarPregunta(index) {
+      console.log("Pregunta para quitar " + index);
+      ARRAY_CAMPOS.splice(index, 1);
+      renderearCampos();
+    }
+  </script>
+
+</body>
+
+</html>
